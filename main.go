@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/x509"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -87,6 +89,12 @@ func main() {
 			EnvVar: "MQTT_USER",
 		},
 		cli.StringFlag{
+			Name:   "ca,a",
+			Usage:  "CA for the Mosquitto message broker",
+			Value:  "",
+			EnvVar: "MQTT_CA",
+		},
+		cli.StringFlag{
 			Name:   "pass,p",
 			Usage:  "Password for the User on the Mosquitto message broker",
 			Value:  "",
@@ -134,7 +142,23 @@ func runServer(c *cli.Context) {
 		}
 	}
 	// if you have a client certificate you want a key aswell
-	if c.String("cert") != "" && c.String("key") != "" {
+	if c.String("ca") != "" {
+		certpool := x509.NewCertPool()
+		pemCerts, err := ioutil.ReadFile(c.String("ca"))
+		if err == nil {
+			certpool.AppendCertsFromPEM(pemCerts)
+		}
+		tlsConfig := &tls.Config{
+			RootCAs:            certpool,
+			InsecureSkipVerify: true,
+			ClientAuth:         tls.NoClientCert,
+		}
+		opts.SetTLSConfig(tlsConfig)
+		if !strings.HasPrefix(c.String("endpoint"), "ssl://") &&
+			!strings.HasPrefix(c.String("endpoint"), "tls://") {
+			log.Println("Warning: To use TLS the endpoint URL will have to begin with 'ssl://' or 'tls://'")
+		}
+	} else if c.String("cert") != "" && c.String("key") != "" {
 		keyPair, err := tls.LoadX509KeyPair(c.String("cert"), c.String("key"))
 		if err != nil {
 			log.Printf("Failed to load certificate/keypair: %s", err)
