@@ -34,6 +34,7 @@ GLOBAL OPTIONS:
    --bind-address value, -b value  Listen address for metrics HTTP endpoint (default: "0.0.0.0:9234") [$BIND_ADDRESS]
    --user value, -u value          Username for the Mosquitto message broker [$MQTT_USER]
    --pass value, -p value          Password for the User on the Mosquitto message broker [$MQTT_PASS]
+   --ca value, -a value            CA for the User on the Mosquitto message broker [$MQTT_CA]
    --cert value, -c value          Location of a TLS certificate .pem file for the Mosquitto message broker [$MQTT_CERT]
    --key value, -k value           Location of a TLS private key .pem file for the Mosquitto message broker [$MQTT_KEY]
    --help, -h                      show help
